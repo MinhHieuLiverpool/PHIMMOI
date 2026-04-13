@@ -11,7 +11,7 @@ export function HomePage() {
     isSearching,
     error,
     cdnImageBaseUrl,
-    featuredMovie,
+    featuredMovies,
     displayedSections,
     searchKeyword,
     setSearchKeyword,
@@ -32,28 +32,41 @@ export function HomePage() {
         hasSearchResults={hasSearchResults}
       />
 
-      <main className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 md:px-8 md:py-8">
+      {/* Hero banner - full width */}
+      {!hasSearchResults && (
         <HeroBanner
-          movie={featuredMovie}
+          movies={featuredMovies}
           cdnImageBaseUrl={cdnImageBaseUrl}
           itemsUpdatedToday={itemsUpdatedToday}
         />
+      )}
 
-        {error ? (
-          <div className="rounded-xl border border-rose-700/60 bg-rose-900/30 p-4 text-sm font-semibold text-rose-200">
+      {/* Error / Loading */}
+      {error && (
+        <div className="mx-auto max-w-7xl px-4 pt-6 md:px-8">
+          <div className="rounded-xl border border-rose-700/60 bg-rose-900/20 p-4 text-sm font-semibold text-rose-200 backdrop-blur">
             {error}
           </div>
-        ) : null}
+        </div>
+      )}
 
-        {isLoading ? <LoadingState /> : null}
+      {isLoading && (
+        <div className="mx-auto max-w-7xl px-4 pt-8 md:px-8">
+          <LoadingState />
+        </div>
+      )}
 
+      {/* Movie sections - full width for auto-scroll */}
+      <main className="flex flex-col gap-10 py-8">
         {!isLoading
-          ? displayedSections.map((section) => (
+          ? displayedSections.map((section, idx) => (
               <MovieSection
                 key={section.key}
                 title={section.title}
                 items={section.items}
                 cdnImageBaseUrl={cdnImageBaseUrl}
+                slug={'slug' in section ? (section as { slug?: string }).slug : undefined}
+                reverse={idx % 2 === 1}
               />
             ))
           : null}

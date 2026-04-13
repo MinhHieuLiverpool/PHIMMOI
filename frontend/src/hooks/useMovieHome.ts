@@ -1,9 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
-import {
-  DEFAULT_SEARCH_KEYWORD,
-  HOME_SECTIONS,
-} from '../config/constants'
+import { HOME_SECTIONS } from '../config/constants'
 import type { MovieItem, MovieSectionData } from '../type/api'
 import { fetchHomeData, fetchListData, searchMovies } from '../services/ophimService'
 
@@ -13,9 +10,9 @@ export function useMovieHome() {
   const [error, setError] = useState('')
 
   const [cdnImageBaseUrl, setCdnImageBaseUrl] = useState('')
-  const [featuredMovie, setFeaturedMovie] = useState<MovieItem | null>(null)
+  const [featuredMovies, setFeaturedMovies] = useState<MovieItem[]>([])
   const [sections, setSections] = useState<MovieSectionData[]>([])
-  const [searchKeyword, setSearchKeyword] = useState(DEFAULT_SEARCH_KEYWORD)
+  const [searchKeyword, setSearchKeyword] = useState('')
   const [searchResults, setSearchResults] = useState<MovieItem[]>([])
   const [itemsUpdatedToday, setItemsUpdatedToday] = useState<number | null>(null)
 
@@ -28,7 +25,7 @@ export function useMovieHome() {
         const homeItems = homeData.items ?? []
 
         setCdnImageBaseUrl(homeData.APP_DOMAIN_CDN_IMAGE)
-        setFeaturedMovie(homeItems[0] ?? null)
+        setFeaturedMovies(homeItems.slice(0, 6))
         setItemsUpdatedToday(homeData.params?.itemsUpdateInDay ?? null)
 
         const sectionResponses = await Promise.allSettled(
@@ -38,6 +35,7 @@ export function useMovieHome() {
             return {
               key: sectionConfig.key,
               title: sectionConfig.title,
+              slug: sectionConfig.slug,
               items: sectionData.items?.slice(0, 18) ?? [],
             }
           }),
@@ -56,12 +54,12 @@ export function useMovieHome() {
         setSections([
           {
             key: 'home-fallback',
-            title: 'De cu tren trang chu',
+            title: 'Đề cử trên trang chủ',
             items: homeItems.slice(0, 20),
           },
         ])
       } catch {
-        setError('Khong tai duoc du lieu phim. Vui long kiem tra backend.')
+        setError('Không tải được dữ liệu phim. Vui lòng kiểm tra backend.')
       } finally {
         setIsLoading(false)
       }
@@ -85,7 +83,7 @@ export function useMovieHome() {
       const searchData = await searchMovies(normalizedKeyword)
       setSearchResults(searchData.items ?? [])
     } catch {
-      setError('Khong tim kiem duoc phim. Thu lai sau.')
+      setError('Không tìm kiếm được phim. Thử lại sau.')
     } finally {
       setIsSearching(false)
     }
@@ -104,7 +102,7 @@ export function useMovieHome() {
     return [
       {
         key: 'search-results',
-        title: `Ket qua tim kiem (${searchResults.length})`,
+        title: `Kết quả tìm kiếm (${searchResults.length})`,
         items: searchResults,
       },
     ]
@@ -115,7 +113,7 @@ export function useMovieHome() {
     isSearching,
     error,
     cdnImageBaseUrl,
-    featuredMovie,
+    featuredMovies,
     displayedSections,
     searchKeyword,
     setSearchKeyword,

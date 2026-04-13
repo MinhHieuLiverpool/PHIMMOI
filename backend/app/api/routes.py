@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+from typing import Optional
 
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import Response
@@ -64,17 +65,21 @@ async def home() -> object:
 
 
 @router.get("/danh-sach/{slug}")
-async def danh_sach(slug: str) -> object:
+async def danh_sach(slug: str, page: Optional[int] = Query(None)) -> object:
     try:
-        return await client.get_json(f"danh-sach/{slug}")
+        params = {"page": str(page)} if page else None
+        return await client.get_json(f"danh-sach/{slug}", params=params)
     except UpstreamApiError as exc:
         raise proxy_error(exc) from exc
 
 
 @router.get("/tim-kiem")
-async def tim_kiem(keyword: str = Query(..., min_length=1)) -> object:
+async def tim_kiem(keyword: str = Query(..., min_length=1), page: Optional[int] = Query(None)) -> object:
     try:
-        return await client.get_json("tim-kiem", params={"keyword": keyword})
+        params: dict[str, str] = {"keyword": keyword}
+        if page:
+            params["page"] = str(page)
+        return await client.get_json("tim-kiem", params=params)
     except UpstreamApiError as exc:
         raise proxy_error(exc) from exc
 
@@ -88,9 +93,10 @@ async def the_loai() -> object:
 
 
 @router.get("/the-loai/{slug}")
-async def the_loai_slug(slug: str) -> object:
+async def the_loai_slug(slug: str, page: Optional[int] = Query(None)) -> object:
     try:
-        return await client.get_json(f"the-loai/{slug}")
+        params = {"page": str(page)} if page else None
+        return await client.get_json(f"the-loai/{slug}", params=params)
     except UpstreamApiError as exc:
         raise proxy_error(exc) from exc
 
@@ -104,9 +110,10 @@ async def quoc_gia() -> object:
 
 
 @router.get("/quoc-gia/{slug}")
-async def quoc_gia_slug(slug: str) -> object:
+async def quoc_gia_slug(slug: str, page: Optional[int] = Query(None)) -> object:
     try:
-        return await client.get_json(f"quoc-gia/{slug}")
+        params = {"page": str(page)} if page else None
+        return await client.get_json(f"quoc-gia/{slug}", params=params)
     except UpstreamApiError as exc:
         raise proxy_error(exc) from exc
 

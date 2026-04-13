@@ -4,11 +4,6 @@ export interface ApiEnvelope<T> {
   data: T
 }
 
-export interface HealthResponse {
-  status?: string
-  service?: string
-}
-
 export interface Pagination {
   totalItems: number
   totalItemsPerPage: number
@@ -49,6 +44,7 @@ export interface MovieItem {
   modified?: { time: string }
   tmdb?: MovieMetaSource
   imdb?: MovieMetaSource
+  sub_docquyen?: boolean
 }
 
 export interface HomeData {
@@ -89,4 +85,53 @@ export interface MovieSectionData {
   key: string
   title: string
   items: MovieItem[]
+}
+
+// Movie Detail types
+export interface EpisodeServer {
+  server_name: string
+  server_data: EpisodeItem[]
+}
+
+export interface EpisodeItem {
+  name: string
+  slug: string
+  filename: string
+  link_embed: string
+  link_m3u8: string
+}
+
+export interface MovieDetailData {
+  seoOnPage?: unknown
+  item: MovieDetailItem
+  episodes: EpisodeServer[]
+}
+
+export interface MovieDetailItem {
+  _id: string
+  name: string
+  origin_name: string
+  slug: string
+  type: string
+  thumb_url: string
+  poster_url?: string
+  time: string
+  episode_current: string
+  episode_total: string
+  quality: string
+  lang: string
+  year: number
+  content: string
+  category: MovieTaxonomy[]
+  country: MovieTaxonomy[]
+  actor?: string[]
+  director?: string[]
+  tmdb?: MovieMetaSource
+  imdb?: MovieMetaSource
+  status?: string
+  sub_docquyen?: boolean
+  trailer_url?: string
+  showtimes?: string
+  notify?: string
+  view?: number
 }
