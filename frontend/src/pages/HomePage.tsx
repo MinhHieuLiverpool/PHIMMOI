@@ -57,7 +57,7 @@ export function HomePage() {
       )}
 
       {/* Movie sections - full width for auto-scroll */}
-      <main className="flex flex-col gap-10 py-8">
+      <main id="movie-sections" className="scroll-mt-20 flex flex-col gap-10 py-8">
         {!isLoading
           ? displayedSections.map((section, idx) => (
               <MovieSection

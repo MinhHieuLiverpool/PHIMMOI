@@ -185,6 +185,18 @@ export function HeroBanner({ movies, cdnImageBaseUrl, itemsUpdatedToday }: HeroB
         </div>
       </div>
 
+      {/* === SCROLL DOWN BUTTON === */}
+      <button
+        type="button"
+        onClick={() => document.getElementById('movie-sections')?.scrollIntoView({ behavior: 'smooth' })}
+        className="absolute bottom-16 left-1/2 z-20 -translate-x-1/2 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:scale-110 animate-bounce"
+        aria-label="Cuộn xuống"
+      >
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+      </button>
+
       {/* === SLIDE INDICATORS === */}
       {movies.length > 1 && (
         <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-2">

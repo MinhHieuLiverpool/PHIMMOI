@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
-import { APP_BRAND, NAV_ITEMS } from '../../config/constants'
+import { NAV_ITEMS } from '../../config/constants'
 import { fetchCategoryList, fetchCountryList } from '../../services/ophimService'
 
 type DropdownItem = { _id: string; name: string; slug: string }

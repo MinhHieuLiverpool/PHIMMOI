@@ -3,7 +3,8 @@ import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { AppHeader } from '../component/layout/AppHeader'
 import { AppFooter } from '../component/layout/AppFooter'
 import { LoadingSpinner } from '../component/movie/LoadingState'
-import { fetchMovieDetail } from '../services/ophimService'
+import { fetchMovieDetail, resolvePosterUrl } from '../services/ophimService'
+import { FALLBACK_POSTER } from '../config/constants'
 import type { MovieDetailItem, EpisodeServer, EpisodeItem } from '../type/api'
 
 export function WatchPage() {
@@ -13,6 +14,7 @@ export function WatchPage() {
   const [error, setError] = useState('')
   const [movie, setMovie] = useState<MovieDetailItem | null>(null)
   const [episodes, setEpisodes] = useState<EpisodeServer[]>([])
+  const [cdnBase, setCdnBase] = useState('https://img.ophim.live')
   const [lightOff, setLightOff] = useState(false)
 
   const activeEpSlug = searchParams.get('tap') || ''
@@ -32,6 +34,7 @@ export function WatchPage() {
         }
         setMovie(result.movie)
         setEpisodes(result.episodes)
+        setCdnBase(result.cdnBase)
       } catch {
         setError('Không tải được dữ liệu phim.')
       } finally {
@@ -47,21 +50,18 @@ export function WatchPage() {
   const currentEpisode: EpisodeItem | null = useMemo(() => {
     if (episodes.length === 0) return null
 
-    // If we have a specific episode slug
     if (activeEpSlug) {
       for (const server of episodes) {
         if (activeServer && server.server_name !== activeServer) continue
         const found = server.server_data.find((ep) => ep.slug === activeEpSlug)
         if (found) return found
       }
-      // Fallback: search all servers
       for (const server of episodes) {
         const found = server.server_data.find((ep) => ep.slug === activeEpSlug)
         if (found) return found
       }
     }
 
-    // Default: first episode of first server
     return episodes[0]?.server_data?.[0] ?? null
   }, [episodes, activeEpSlug, activeServer])
 
@@ -72,11 +72,31 @@ export function WatchPage() {
 
   const embedUrl = currentEpisode?.link_embed || ''
 
+  const posterUrl = movie
+    ? resolvePosterUrl(cdnBase, movie.poster_url || movie.thumb_url)
+    : FALLBACK_POSTER
+  const thumbUrl = movie
+    ? resolvePosterUrl(cdnBase, movie.thumb_url)
+    : FALLBACK_POSTER
+
   return (
-    <div className={`min-h-screen bg-slate-950 ${lightOff ? 'lights-off' : ''}`}>
+    <div className={`min-h-screen ${lightOff ? 'bg-black' : ''}`}>
       {!lightOff && <AppHeader />}
 
-      <main className="mx-auto w-full max-w-7xl px-4 pt-24 pb-4 md:px-8">
+      {/* Background thumbnail */}
+      {movie && !lightOff && (
+        <div className="fixed inset-0 -z-10 overflow-hidden">
+          <img
+            src={posterUrl}
+            alt=""
+            className="h-full w-full object-cover blur-xl brightness-[0.25] saturate-150 scale-125"
+            onError={(e) => { e.currentTarget.src = FALLBACK_POSTER }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/30 via-slate-950/50 to-slate-950/90" />
+        </div>
+      )}
+
+      <main className={`mx-auto w-full max-w-7xl px-4 ${lightOff ? 'pt-8' : 'pt-24'} pb-4 md:px-8`}>
         {loading && <LoadingSpinner />}
         {error && (
           <div className="rounded-xl border border-rose-700/60 bg-rose-900/20 p-4 text-sm text-rose-200">
@@ -87,21 +107,23 @@ export function WatchPage() {
         {movie && !loading && (
           <>
             {/* Breadcrumb */}
-            <nav className="mb-4 flex items-center gap-2 text-sm text-slate-500">
-              <Link to="/" className="transition hover:text-cyan-400">
-                Trang chủ
-              </Link>
-              <span>/</span>
-              <Link to={`/phim/${movie.slug}`} className="transition hover:text-cyan-400">
-                {movie.name}
-              </Link>
-              <span>/</span>
-              <span className="text-cyan-400">{currentEpisode?.name ? `Tập ${currentEpisode.name}` : 'Xem phim'}</span>
-            </nav>
+            {!lightOff && (
+              <nav className="mb-4 flex items-center gap-2 text-sm text-slate-500">
+                <Link to="/" className="transition hover:text-cyan-400">
+                  Trang chủ
+                </Link>
+                <span>/</span>
+                <Link to={`/phim/${movie.slug}`} className="transition hover:text-cyan-400">
+                  {movie.name}
+                </Link>
+                <span>/</span>
+                <span className="text-cyan-400">{currentEpisode?.name ? `Tập ${currentEpisode.name}` : 'Xem phim'}</span>
+              </nav>
+            )}
 
             {/* Player */}
             <div className="relative">
-              <div className="aspect-video w-full overflow-hidden rounded-xl border border-slate-800/50 bg-black shadow-2xl shadow-black/40">
+              <div className="aspect-video w-full overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl shadow-black/60">
                 {embedUrl ? (
                   <iframe
                     key={embedUrl}
@@ -117,44 +139,45 @@ export function WatchPage() {
                   </div>
                 )}
               </div>
-            </div>
 
-            {/* Controls bar */}
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+              {/* Light toggle - floating on player */}
               <button
                 type="button"
                 onClick={() => setLightOff(!lightOff)}
-                className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition ${
+                className={`absolute top-3 right-3 z-10 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold shadow-lg backdrop-blur-md transition-all ${
                   lightOff
-                    ? 'border-cyan-400/50 bg-cyan-500/10 text-cyan-300'
-                    : 'border-slate-700/50 text-slate-400 hover:border-slate-600 hover:text-slate-200'
+                    ? 'bg-amber-500/90 text-black hover:bg-amber-400'
+                    : 'bg-black/60 text-white/80 hover:bg-black/80 hover:text-white'
                 }`}
               >
-                💡 {lightOff ? 'Bật đèn' : 'Tắt đèn'}
+                {lightOff ? (
+                  <>
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0a.996.996 0 000-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" /></svg>
+                    Bật đèn
+                  </>
+                ) : (
+                  <>
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24"><path d="M9.37 5.51A7.35 7.35 0 009.1 7.5c0 4.08 3.32 7.4 7.4 7.4.68 0 1.35-.09 1.99-.27A7.014 7.014 0 0112 19c-3.86 0-7-3.14-7-7 0-2.93 1.81-5.45 4.37-6.49zM12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" /></svg>
+                    Tắt đèn
+                  </>
+                )}
               </button>
-
-              <Link
-                to={`/phim/${movie.slug}`}
-                className="flex items-center gap-1.5 rounded-lg border border-slate-700/50 px-3 py-2 text-xs font-semibold text-slate-400 transition hover:border-slate-600 hover:text-slate-200"
-              >
-                ℹ️ Chi tiết phim
-              </Link>
             </div>
 
-            {/* Movie title */}
-            <div className="mt-6 space-y-1">
+            {/* Movie info below player */}
+            <div className="mt-6 space-y-2">
               <h1 className="text-2xl font-black text-white md:text-3xl">
                 {movie.name}
                 {currentEpisode?.name ? ` - Tập ${currentEpisode.name}` : ''}
               </h1>
-              <p className="text-sm text-slate-400">
+              <p className="text-sm text-slate-400" style={{ fontFamily: "'Syne', sans-serif" }}>
                 {movie.origin_name} ({movie.year})
               </p>
               <div className="flex flex-wrap gap-2 pt-1 text-xs">
-                <span className="rounded-full bg-cyan-500/20 px-3 py-1 text-cyan-300">
+                <span className="rounded-full bg-cyan-500/20 px-3 py-1 font-semibold text-cyan-300">
                   {movie.quality}
                 </span>
-                <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-emerald-300">
+                <span className="rounded-full bg-emerald-500/20 px-3 py-1 font-semibold text-emerald-300">
                   {movie.lang}
                 </span>
                 <span className="rounded-full bg-white/10 px-3 py-1 text-slate-300">
@@ -227,6 +250,67 @@ export function WatchPage() {
                 ))}
               </section>
             )}
+
+            {/* Movie detail section at the bottom */}
+            <section className="mt-12 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+              <div className="flex flex-col gap-6 md:flex-row">
+                {/* Poster thumbnail */}
+                <div className="shrink-0">
+                  <img
+                    src={thumbUrl}
+                    alt={movie.name}
+                    className="w-40 rounded-xl border border-white/10 shadow-lg md:w-48"
+                    onError={(e) => { e.currentTarget.src = FALLBACK_POSTER }}
+                  />
+                </div>
+
+                {/* Details */}
+                <div className="flex-1 space-y-3">
+                  <Link
+                    to={`/phim/${movie.slug}`}
+                    className="text-xl font-bold text-white transition hover:text-cyan-400"
+                  >
+                    {movie.name}
+                  </Link>
+                  <p className="text-sm text-slate-400">{movie.origin_name}</p>
+
+                  <div className="space-y-1.5 text-sm text-slate-400">
+                    {movie.category?.length > 0 && (
+                      <p>
+                        <span className="text-slate-300">Thể loại: </span>
+                        {movie.category.map((c) => c.name).join(', ')}
+                      </p>
+                    )}
+                    {movie.country?.length > 0 && (
+                      <p>
+                        <span className="text-slate-300">Quốc gia: </span>
+                        {movie.country.map((c) => c.name).join(', ')}
+                      </p>
+                    )}
+                    {movie.director && movie.director.filter(Boolean).length > 0 && (
+                      <p>
+                        <span className="text-slate-300">Đạo diễn: </span>
+                        {movie.director.filter(Boolean).join(', ')}
+                      </p>
+                    )}
+                    {movie.actor && movie.actor.filter(Boolean).length > 0 && (
+                      <p>
+                        <span className="text-slate-300">Diễn viên: </span>
+                        {movie.actor.filter(Boolean).slice(0, 8).join(', ')}
+                        {movie.actor.filter(Boolean).length > 8 && '...'}
+                      </p>
+                    )}
+                  </div>
+
+                  {movie.content && (
+                    <div
+                      className="line-clamp-3 text-sm leading-relaxed text-slate-400"
+                      dangerouslySetInnerHTML={{ __html: movie.content }}
+                    />
+                  )}
+                </div>
+              </div>
+            </section>
           </>
         )}
       </main>
