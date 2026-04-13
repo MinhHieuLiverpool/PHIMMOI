@@ -48,7 +48,7 @@ export function MovieCard({ movie, cdnImageBaseUrl }: MovieCardProps) {
 
       <div className="space-y-1.5 p-2.5">
         <Link to={`/phim/${movie.slug}`}>
-          <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-bold leading-tight text-white group-hover:text-cyan-300 transition-colors" style={{ fontFamily: "'Syne', sans-serif" }}>
+          <h3 className="line-clamp-2 min-h-[3rem] text-base font-bold leading-tight text-white group-hover:text-cyan-300 transition-colors" style={{ fontFamily: "'Syne', sans-serif" }}>
             {movie.name}
           </h3>
         </Link>

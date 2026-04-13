@@ -3,9 +3,10 @@ import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { AppHeader } from '../component/layout/AppHeader'
 import { AppFooter } from '../component/layout/AppFooter'
 import { LoadingSpinner } from '../component/movie/LoadingState'
-import { fetchMovieDetail, resolvePosterUrl } from '../services/ophimService'
+import { MovieCard } from '../component/movie/MovieCard'
+import { fetchMovieDetail, fetchCategoryMovies, resolvePosterUrl } from '../services/ophimService'
 import { FALLBACK_POSTER } from '../config/constants'
-import type { MovieDetailItem, EpisodeServer, EpisodeItem } from '../type/api'
+import type { MovieDetailItem, MovieItem, EpisodeServer, EpisodeItem } from '../type/api'
 
 export function WatchPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -16,6 +17,7 @@ export function WatchPage() {
   const [episodes, setEpisodes] = useState<EpisodeServer[]>([])
   const [cdnBase, setCdnBase] = useState('https://img.ophim.live')
   const [lightOff, setLightOff] = useState(false)
+  const [relatedMovies, setRelatedMovies] = useState<MovieItem[]>([])
 
   const activeEpSlug = searchParams.get('tap') || ''
   const activeServer = searchParams.get('sv') || ''
@@ -45,6 +47,21 @@ export function WatchPage() {
     void load()
     window.scrollTo(0, 0)
   }, [slug])
+
+  // Fetch related movies based on first category
+  useEffect(() => {
+    if (!movie?.category?.length) return
+    const firstCat = movie.category[0]
+    if (!firstCat?.slug) return
+
+    fetchCategoryMovies(firstCat.slug, 1)
+      .then((data) => {
+        // Filter out the current movie and take 12
+        const filtered = (data.items ?? []).filter((m) => m.slug !== slug).slice(0, 12)
+        setRelatedMovies(filtered)
+      })
+      .catch(() => {})
+  }, [movie, slug])
 
   // Determine which episode to play
   const currentEpisode: EpisodeItem | null = useMemo(() => {
@@ -311,6 +328,28 @@ export function WatchPage() {
                 </div>
               </div>
             </section>
+            {relatedMovies.length > 0 && movie?.category?.[0] && (
+              <section className="mt-12">
+                <div className="mb-4 flex items-center gap-3">
+                  <div className="h-6 w-1.5 rounded-full bg-gradient-to-b from-cyan-400 to-emerald-400" />
+                  <h2 className="text-xl font-black text-white" style={{ fontFamily: "'Syne', sans-serif" }}>Phim liên quan</h2>
+                </div>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                  {relatedMovies.map((m) => (
+                    <MovieCard key={m._id} movie={m} cdnImageBaseUrl={cdnBase} />
+                  ))}
+                </div>
+                <div className="mt-6 flex justify-center">
+                  <Link
+                    to={`/the-loai/${movie.category[0].slug}`}
+                    className="group flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-8 py-3 text-sm font-semibold text-slate-200 backdrop-blur-sm transition-all hover:bg-cyan-500/15 hover:border-cyan-400/40 hover:text-cyan-300"
+                  >
+                    Xem thêm phim {movie.category[0].name}
+                    <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                  </Link>
+                </div>
+              </section>
+            )}
           </>
         )}
       </main>
