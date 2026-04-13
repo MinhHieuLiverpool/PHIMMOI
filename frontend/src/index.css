@@ -1,0 +1,42 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    font-family: 'Manrope', 'Segoe UI', sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply min-h-screen text-slate-100;
+    margin: 0;
+    background:
+      radial-gradient(circle at 10% -10%, rgba(14, 165, 233, 0.25), transparent 38%),
+      radial-gradient(circle at 90% -15%, rgba(16, 185, 129, 0.2), transparent 35%),
+      linear-gradient(180deg, #020617 0%, #020617 46%, #030712 100%);
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+}
+
+@layer utilities {
+  .movie-scroll {
+    scrollbar-width: none;
+  }
+
+  .movie-scroll::-webkit-scrollbar {
+    display: none;
+  }
+}
