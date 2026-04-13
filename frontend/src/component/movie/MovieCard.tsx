@@ -27,9 +27,8 @@ export function MovieCard({ movie, cdnImageBaseUrl }: MovieCardProps) {
           />
         </Link>
 
-        {/* Logo watermark - top left */}
-        <div className="absolute left-2 top-2">
-          <img src="/logo.png" alt="" className="h-20 w-20 object-contain drop-shadow-lg opacity-80" />
+        <div className="absolute left-1.5 top-1.5 z-10">
+          <img src="/logo-icon.png" alt="" className="h-8 w-8 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] opacity-90" />
         </div>
 
         {/* Episode badge */}

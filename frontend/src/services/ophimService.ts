@@ -12,19 +12,15 @@ export function resolvePosterUrl(cdnBase: string, imagePath?: string): string {
     return FALLBACK_POSTER
   }
 
-  let absoluteUrl: string
-
   if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-    absoluteUrl = imagePath
-  } else {
-    const base = cdnBase.endsWith('/') ? cdnBase.slice(0, -1) : cdnBase
-    // OPhim API returns just filenames like "movie-thumb.jpg"
-    // The actual CDN path needs /uploads/movies/ prefix
-    const path = imagePath.startsWith('/') ? imagePath : `/uploads/movies/${imagePath}`
-    absoluteUrl = `${base}${path}`
+    return imagePath
   }
 
-  return `${API_BASE_URL}/image?url=${encodeURIComponent(absoluteUrl)}`
+  const base = cdnBase.endsWith('/') ? cdnBase.slice(0, -1) : cdnBase
+  // OPhim API returns just filenames like "movie-thumb.jpg"
+  // The actual CDN path needs /uploads/movies/ prefix
+  const path = imagePath.startsWith('/') ? imagePath : `/uploads/movies/${imagePath}`
+  return `${base}${path}`
 }
 
 export async function fetchHomeData(): Promise<HomeData> {
@@ -77,6 +73,11 @@ export async function fetchMovieDetail(slug: string): Promise<{
 
 export async function fetchCategoryList(): Promise<unknown> {
   const result = await getJson<unknown>(`${API_BASE_URL}/the-loai`)
+  return result.data
+}
+
+export async function fetchCountryList(): Promise<unknown> {
+  const result = await getJson<unknown>(`${API_BASE_URL}/quoc-gia`)
   return result.data
 }
 
