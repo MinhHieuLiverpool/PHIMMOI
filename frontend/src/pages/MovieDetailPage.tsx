@@ -98,7 +98,7 @@ export function MovieDetailPage() {
             </div>
 
             {/* Hero Content */}
-            <div className="relative mx-auto w-full max-w-7xl px-4 pb-10 pt-8 md:px-8 md:pt-12">
+            <div className="relative mx-auto w-full max-w-7xl px-4 pb-10 pt-24 md:px-8 md:pt-28">
               <div className="flex flex-col gap-8 md:flex-row md:items-start md:gap-10">
                 {/* Poster */}
                 <div className="shrink-0 self-center md:self-start">

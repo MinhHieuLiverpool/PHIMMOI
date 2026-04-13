@@ -76,7 +76,7 @@ export function WatchPage() {
     <div className={`min-h-screen bg-slate-950 ${lightOff ? 'lights-off' : ''}`}>
       {!lightOff && <AppHeader />}
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-4 md:px-8">
+      <main className="mx-auto w-full max-w-7xl px-4 pt-24 pb-4 md:px-8">
         {loading && <LoadingSpinner />}
         {error && (
           <div className="rounded-xl border border-rose-700/60 bg-rose-900/20 p-4 text-sm text-rose-200">

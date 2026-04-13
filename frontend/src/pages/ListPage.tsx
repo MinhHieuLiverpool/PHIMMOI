@@ -58,7 +58,7 @@ export function ListPage() {
     <div className="min-h-screen bg-slate-950">
       <AppHeader />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-8">
+      <main className="mx-auto w-full max-w-7xl px-4 pt-24 pb-6 md:px-8">
         {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-2 text-sm text-slate-500">
           <Link to="/" className="hover:text-cyan-400 transition">Trang chủ</Link>
@@ -83,7 +83,7 @@ export function ListPage() {
           <div className="py-20 text-center text-slate-500">Không tìm thấy phim nào.</div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
               {items.map((movie) => (
                 <MovieCard key={movie._id} movie={movie} cdnImageBaseUrl={cdnBase} />
               ))}

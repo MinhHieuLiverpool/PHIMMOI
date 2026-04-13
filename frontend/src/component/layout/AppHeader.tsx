@@ -35,26 +35,24 @@ export function AppHeader({
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800/50 bg-slate-950/40 backdrop-blur-xl">
-      <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-3 md:px-8">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-white/5 bg-slate-950/15 backdrop-blur-md">
+      <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-2 md:px-8">
         {/* Logo */}
-        <Link to="/" className="flex shrink-0 items-center gap-3 group">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-emerald-400 to-cyan-400 text-base font-black text-slate-900 transition-transform group-hover:scale-110">
-            P
-          </div>
-          <div className="hidden sm:block">
-            <p className="text-lg font-extrabold tracking-wide text-white">{APP_BRAND}</p>
-            <p className="text-[11px] text-slate-500">Xem phim miễn phí</p>
-          </div>
+        <Link to="/" className="flex shrink-0 items-center gap-2 group">
+          <img
+            src="/logo.png"
+            alt="Mê Phim"
+            className="h-14 w-auto object-contain transition-transform group-hover:scale-105"
+          />
         </Link>
 
-        {/* Desktop Nav */}
-        <nav className="hidden items-center gap-1 lg:flex">
+        {/* Desktop Nav - centered */}
+        <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex" style={{ fontFamily: "'Syne', sans-serif" }}>
           {NAV_ITEMS.map((item) => (
             <Link
               key={item.path}
               to={item.path}
-              className="rounded-lg px-3 py-1.5 text-sm text-slate-300 transition hover:bg-slate-800/80 hover:text-white"
+              className="rounded-lg px-4 py-1.5 text-sm font-semibold tracking-wide text-slate-300 transition hover:bg-white/10 hover:text-white"
             >
               {item.label}
             </Link>

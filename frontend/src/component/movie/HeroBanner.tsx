@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import type { MovieItem } from '../../type/api'
 import { FALLBACK_POSTER } from '../../config/constants'
-import { resolvePosterUrl } from '../../services/ophimService'
+import { resolvePosterUrl, fetchMovieDetail } from '../../services/ophimService'
 
 type HeroBannerProps = {
   movies: MovieItem[]
@@ -10,11 +10,13 @@ type HeroBannerProps = {
   itemsUpdatedToday: number | null
 }
 
-const SLIDE_INTERVAL = 15000
+const SLIDE_INTERVAL = 5000
 
 export function HeroBanner({ movies, cdnImageBaseUrl, itemsUpdatedToday }: HeroBannerProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [movieContent, setMovieContent] = useState<string>('')
+  const contentCache = useRef<Record<string, string>>({})
 
   const goToSlide = useCallback(
     (index: number) => {
@@ -40,18 +42,50 @@ export function HeroBanner({ movies, cdnImageBaseUrl, itemsUpdatedToday }: HeroB
     return () => clearInterval(timer)
   }, [movies.length])
 
+  // Fetch movie content/description for current banner movie
+  useEffect(() => {
+    if (movies.length === 0) return
+    const slug = movies[currentIndex]?.slug
+    if (!slug) return
+
+    // Use cache if available
+    if (contentCache.current[slug]) {
+      setMovieContent(contentCache.current[slug])
+      return
+    }
+
+    let cancelled = false
+    fetchMovieDetail(slug)
+      .then(({ movie: detail }) => {
+        if (cancelled) return
+        // Strip HTML tags from content
+        const raw = detail.content?.replace(/<[^>]*>/g, '') || ''
+        contentCache.current[slug] = raw
+        setMovieContent(raw)
+      })
+      .catch(() => {
+        if (!cancelled) setMovieContent('')
+      })
+    return () => { cancelled = true }
+  }, [movies, currentIndex])
+
   if (movies.length === 0) return null
 
   const movie = movies[currentIndex]
-  const thumbUrl = resolvePosterUrl(cdnImageBaseUrl, movie.thumb_url)
-  const posterUrl = resolvePosterUrl(cdnImageBaseUrl, movie.poster_url || movie.thumb_url)
+  // thumb_url = portrait thumbnail (used for poster card in corner)
+  const posterCardUrl = resolvePosterUrl(cdnImageBaseUrl, movie.thumb_url)
+  // poster_url = wider backdrop (used for full-screen background)
+  // If poster_url not available, derive from thumb_url by replacing -thumb with -poster
+  const backdropPath = movie.poster_url
+    || (movie.thumb_url ? movie.thumb_url.replace('-thumb', '-poster') : movie.thumb_url)
+  const backdropUrl = resolvePosterUrl(cdnImageBaseUrl, backdropPath)
 
   return (
-    <section className="relative w-full overflow-hidden bg-slate-950" style={{ height: 'clamp(580px, 85vh, 850px)' }}>
+    <section className="relative w-full overflow-hidden bg-slate-950" style={{ height: 'clamp(650px, 100vh, 950px)' }}>
       {/* === BACKDROP IMAGE (full cover) === */}
       <div className={`absolute inset-0 transition-opacity duration-700 ${isTransitioning ? 'opacity-0' : 'opacity-100'}`}>
         <img
-          src={thumbUrl}
+          src={backdropUrl}
           alt=""
           className="h-full w-full scale-110 object-cover object-[center_35%]"
           onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_POSTER }}
@@ -107,6 +141,13 @@ export function HeroBanner({ movies, cdnImageBaseUrl, itemsUpdatedToday }: HeroB
               )}
             </div>
 
+            {/* Movie Description */}
+            {movieContent && (
+              <p className="line-clamp-2 text-sm leading-relaxed text-slate-300/90 md:text-base">
+                {movieContent}
+              </p>
+            )}
+
             {/* Buttons */}
             <div className="flex gap-3 pt-2">
               <Link
@@ -132,7 +173,7 @@ export function HeroBanner({ movies, cdnImageBaseUrl, itemsUpdatedToday }: HeroB
           <div className="hidden shrink-0 md:block">
             <div className="relative">
               <img
-                src={posterUrl}
+                src={posterCardUrl}
                 alt={movie.name}
                 className="h-[280px] w-auto rounded-2xl border-2 border-white/10 object-cover shadow-2xl shadow-black/50 transition-transform duration-700 hover:scale-105 lg:h-[320px]"
                 onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = FALLBACK_POSTER }}
@@ -152,26 +193,16 @@ export function HeroBanner({ movies, cdnImageBaseUrl, itemsUpdatedToday }: HeroB
               key={idx}
               type="button"
               onClick={() => goToSlide(idx)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                idx === currentIndex
-                  ? 'w-8 bg-white'
-                  : 'w-3 bg-white/30 hover:bg-white/50'
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex
+                ? 'w-8 bg-white'
+                : 'w-3 bg-white/30 hover:bg-white/50'
+                }`}
               aria-label={`Slide ${idx + 1}`}
             />
           ))}
         </div>
       )}
 
-      {/* === PROGRESS BAR === */}
-      {movies.length > 1 && (
-        <div className="absolute bottom-0 left-0 z-20 h-[2px] w-full bg-white/5">
-          <div
-            key={currentIndex}
-            className="h-full bg-gradient-to-r from-cyan-400 to-emerald-400 animate-progress"
-          />
-        </div>
-      )}
     </section>
   )
 }

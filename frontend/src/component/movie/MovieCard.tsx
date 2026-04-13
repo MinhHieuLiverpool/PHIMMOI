@@ -12,9 +12,9 @@ export function MovieCard({ movie, cdnImageBaseUrl }: MovieCardProps) {
   const posterUrl = resolvePosterUrl(cdnImageBaseUrl, movie.poster_url || movie.thumb_url)
 
   return (
-    <Link to={`/phim/${movie.slug}`} className="block">
-      <article className="group w-[220px] shrink-0 overflow-hidden rounded-xl border border-slate-800/60 bg-slate-900/60 transition-all duration-300 hover:-translate-y-1.5 hover:border-cyan-400/40 hover:shadow-2xl hover:shadow-cyan-500/10">
-        <div className="relative overflow-hidden">
+    <article className="group w-full min-w-[180px] max-w-[260px] shrink-0 overflow-hidden rounded-xl border border-slate-800/60 bg-slate-900/60 transition-all duration-300 hover:-translate-y-1.5 hover:border-cyan-400/40 hover:shadow-2xl hover:shadow-cyan-500/10">
+      <div className="relative overflow-hidden">
+        <Link to={`/phim/${movie.slug}`} className="block">
           <img
             src={posterUrl}
             alt={movie.name}
@@ -25,46 +25,67 @@ export function MovieCard({ movie, cdnImageBaseUrl }: MovieCardProps) {
               event.currentTarget.src = FALLBACK_POSTER
             }}
           />
+        </Link>
 
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-
-          {/* Play button on hover */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-400/90 text-slate-900 shadow-lg shadow-cyan-400/30 backdrop-blur">
-              <svg className="h-5 w-5 translate-x-0.5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Episode badge */}
-          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-            <span className="rounded-md bg-black/70 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
-              {movie.episode_current}
-            </span>
-          </div>
-
-          {/* Quality badge */}
-          <div className="absolute right-2 top-2">
-            <span className="rounded-md bg-cyan-500/90 px-1.5 py-0.5 text-[10px] font-bold text-white">
-              {movie.quality}
-            </span>
-          </div>
+        {/* Logo watermark - top left */}
+        <div className="absolute left-2 top-2">
+          <img src="/logo.png" alt="" className="h-20 w-20 object-contain drop-shadow-lg opacity-80" />
         </div>
 
-        <div className="space-y-1.5 p-2.5">
+        {/* Episode badge */}
+        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+          <span className="rounded-md bg-black/70 px-2 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
+            {movie.episode_current}
+          </span>
+        </div>
+
+        {/* Quality badge - bigger */}
+        <div className="absolute right-2 top-2">
+          <span className="rounded-lg bg-gradient-to-r from-cyan-500 to-emerald-500 px-2.5 py-1 text-xs font-extrabold tracking-wide text-white shadow-lg shadow-cyan-500/30">
+            {movie.quality}
+          </span>
+        </div>
+      </div>
+
+      <div className="space-y-1.5 p-2.5">
+        <Link to={`/phim/${movie.slug}`}>
           <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-bold leading-tight text-white group-hover:text-cyan-300 transition-colors">
             {movie.name}
           </h3>
-          <p className="line-clamp-1 text-xs text-slate-500">{movie.origin_name}</p>
+        </Link>
+        <p className="line-clamp-1 text-xs font-bold text-slate-400" style={{ fontFamily: "'Syne', sans-serif" }}>
+          {movie.origin_name}
+        </p>
 
-          <div className="flex flex-wrap gap-1 text-[10px]">
-            <span className="rounded bg-slate-800/80 px-1.5 py-0.5 text-slate-400">{movie.lang}</span>
-            <span className="rounded bg-slate-800/80 px-1.5 py-0.5 text-slate-400">{movie.year}</span>
-          </div>
+        <div className="flex flex-wrap gap-1.5 text-[10px]">
+          <span className="rounded-md bg-emerald-500/20 px-2 py-0.5 font-semibold text-emerald-400 border border-emerald-500/30">
+            {movie.lang}
+          </span>
+          <span className="rounded-md bg-amber-500/20 px-2 py-0.5 font-semibold text-amber-400 border border-amber-500/30">
+            {movie.year}
+          </span>
         </div>
-      </article>
-    </Link>
+
+        {/* Action buttons */}
+        <div className="flex gap-1.5 pt-1">
+          <Link
+            to={`/xem-phim/${movie.slug}`}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white py-1.5 text-[11px] font-bold text-slate-900 transition-all hover:bg-white/90 active:scale-95"
+          >
+            <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Xem
+          </Link>
+          <Link
+            to={`/phim/${movie.slug}`}
+            className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-slate-600/50 bg-slate-800/60 py-1.5 text-[11px] font-semibold text-slate-300 transition-all hover:bg-slate-700/60 hover:text-white active:scale-95"
+          >
+            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Chi tiết
+          </Link>
+        </div>
+      </div>
+    </article>
   )
 }
