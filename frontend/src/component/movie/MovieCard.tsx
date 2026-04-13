@@ -12,7 +12,7 @@ export function MovieCard({ movie, cdnImageBaseUrl }: MovieCardProps) {
   const posterUrl = resolvePosterUrl(cdnImageBaseUrl, movie.poster_url || movie.thumb_url)
 
   return (
-    <article className="group w-full min-w-[180px] max-w-[260px] shrink-0 overflow-hidden rounded-xl border border-slate-800/60 bg-slate-900/60 transition-all duration-300 hover:-translate-y-1.5 hover:border-cyan-400/40 hover:shadow-2xl hover:shadow-cyan-500/10">
+    <article className="group w-full min-w-[180px] max-w-[260px] shrink-0 overflow-hidden rounded-xl border border-slate-800/60 bg-slate-900/60 transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400/40 hover:shadow-[0_8px_40px_-8px_rgba(6,182,212,0.25)]">
       <div className="relative overflow-hidden">
         <Link to={`/phim/${movie.slug}`} className="block">
           <img
@@ -48,7 +48,7 @@ export function MovieCard({ movie, cdnImageBaseUrl }: MovieCardProps) {
 
       <div className="space-y-1.5 p-2.5">
         <Link to={`/phim/${movie.slug}`}>
-          <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-bold leading-tight text-white group-hover:text-cyan-300 transition-colors">
+          <h3 className="line-clamp-2 min-h-[2.75rem] text-sm font-bold leading-tight text-white group-hover:text-cyan-300 transition-colors" style={{ fontFamily: "'Syne', sans-serif" }}>
             {movie.name}
           </h3>
         </Link>
@@ -66,19 +66,19 @@ export function MovieCard({ movie, cdnImageBaseUrl }: MovieCardProps) {
         </div>
 
         {/* Action buttons */}
-        <div className="flex gap-1.5 pt-1">
+        <div className="flex gap-2 pt-2">
           <Link
             to={`/xem-phim/${movie.slug}`}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-white py-1.5 text-[11px] font-bold text-slate-900 transition-all hover:bg-white/90 active:scale-95"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-emerald-500 py-2 text-[11px] font-bold text-white shadow-md shadow-cyan-500/20 transition-all hover:shadow-lg hover:shadow-cyan-500/30 hover:brightness-110 active:scale-95"
           >
             <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
-            Xem
+            Xem ngay
           </Link>
           <Link
             to={`/phim/${movie.slug}`}
-            className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-slate-600/50 bg-slate-800/60 py-1.5 text-[11px] font-semibold text-slate-300 transition-all hover:bg-slate-700/60 hover:text-white active:scale-95"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-white/15 bg-white/5 py-2 text-[11px] font-semibold text-slate-200 backdrop-blur-sm transition-all hover:bg-white/10 hover:text-white active:scale-95"
           >
             <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             Chi tiết
